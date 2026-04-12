@@ -45,6 +45,16 @@ Java 21 + Spring Boot 3.5 환경이므로 record, sealed class 등 최신 언어
 - `ApiResponse<T>`는 **record**로 구현한다
 - 모든 도메인 예외의 공통 부모로 `BaseException(HttpStatus, String)`을 두고, `GlobalExceptionHandler`는 `BaseException` 하나로 처리한다
 
+수정 내용:
+기존: BaseException(HttpStatus, String message)
+변경: BaseException(HttpStatus, String errorCode, String message)
+
+추가 근거:
+- 같은 HTTP 404에도 MEMBER_NOT_FOUND, GAME_NOT_FOUND 구분 필요
+- 클라이언트가 errorCode로 프로그래밍적 분기 가능
+- 로그 검색 시 errorCode grep이 메시지 grep보다 정확
+- 실무 API 표준 (토스/카카오/네이버 등 국내 백엔드 API 응답에 errorCode 포함)
+
 ---
 
 ## Rationale
