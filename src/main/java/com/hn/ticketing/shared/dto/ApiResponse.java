@@ -1,24 +1,20 @@
 package com.hn.ticketing.shared.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import org.springframework.http.HttpStatus;
-
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public record ApiResponse<T>(int status, String message, T data) {
+public record ApiResponse<T>(
+        int status,
+        String errorCode,   // 실패 시만 채워짐, 성공 시 null
+        String message,
+        T data
+) {
+    public static <T> ApiResponse<T> success(String message, T data) {
+        return new ApiResponse<>(200, null, message, data);
+    }
 
     public static <T> ApiResponse<T> success(T data) {
-        return new ApiResponse<>(HttpStatus.OK.value(), "OK", data);
+        return new ApiResponse<>(200, null, "OK", data);
     }
 
-    public static <T> ApiResponse<T> success(String message, T data) {
-        return new ApiResponse<>(HttpStatus.OK.value(), message, data);
-    }
-
-    public static <T> ApiResponse<T> error(int status, String message) {
-        return new ApiResponse<>(status, message, null);
-    }
-
-    public static <T> ApiResponse<T> error(int status, String message, T data) {
-        return new ApiResponse<>(status, message, data);
+    public static ApiResponse<Void> error(int status, String errorCode, String message) {
+        return new ApiResponse<>(status, errorCode, message, null);
     }
 }

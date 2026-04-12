@@ -20,3 +20,10 @@ spring:
       port: 6379
   kafka:
     bootstrap-servers: localhost:9092
+
+jwt:
+  # 실제 운영에서는 환경변수로 주입해야 함 (application-prod.yml에서 오버라이드)
+  # 학습용이라 기본값을 여기 둠. 최소 32byte 필요.
+  secret: "ticketing-jwt-secret-key-please-change-in-production-32byte-min"
+  expiration-seconds: 86400  # 24시간 (기획안: 장시간 TTL, 단순화)
+
