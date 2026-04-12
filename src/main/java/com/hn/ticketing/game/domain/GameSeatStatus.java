@@ -1,17 +1,21 @@
 package com.hn.ticketing.game.domain;
 
-// ── 경기별 좌석의 "판매 가능 여부" enum ──
+// ── 경기별 좌석 상태 enum ──
+// GameSeat 엔티티에서 사용.
 //
-// 주의: 이건 좌석의 "점유 상태"(AVAILABLE/HELD/CONFIRMED)와 다르다.
-// 점유 상태는 Redis에만 존재하고 DB에는 없다.
+// 주의: 실시간 점유 판단은 Redis 키 존재 여부로 한다 (SEAT_HOLD_DESIGN 참조).
+// 이 enum은 MySQL에 "최종 확정 상태"를 영속적으로 기록하는 역할.
 //
-// GameSeatStatus는 "이 좌석을 애초에 판매 대상으로 열었는가"를 나타낸다.
-// 예: 시야 불량석, 방송 카메라석 → UNAVAILABLE로 잠금.
-//     이미 시즌권으로 팔린 좌석 → SOLD_OUT.
-//
-// 관리자가 경기 등록 시 설정하는 값이다. 실시간으로 바뀌지 않는다.
+// 상태 전이:
+//   AVAILABLE → HELD → CONFIRMED (결제 성공)
+//                   → AVAILABLE  (TTL 만료 / 자진 해제)
+//   CONFIRMED → CANCELLED (예매 취소)
+//   CANCELLED → AVAILABLE (취소 후 재오픈)
+
 public enum GameSeatStatus {
-    AVAILABLE,      // 판매 가능 — 일반 사용자가 점유 시도 가능
-    UNAVAILABLE,    // 판매 불가 — 시야 불량, 카메라석 등
-    SOLD_OUT;       // 매진 — 시즌권 등으로 이미 배정됨
+
+    AVAILABLE,   // 예매 가능
+    HELD,        // 임시 점유 중 (Redis TTL 만료 시 AVAILABLE로 복귀)
+    CONFIRMED,   // 결제 완료, 영구 확정
+    CANCELLED;   // 예매 취소됨
 }
