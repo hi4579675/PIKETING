@@ -64,7 +64,7 @@ public class AdminGameService {
             }
         }
 
-        gameSeatRepository.saveAll(gameSeats);
+        gameSeats.forEach(gameSeatRepository::save);
         return savedGame.getId();
     }
     // ── 구역 등록 ──
@@ -104,7 +104,7 @@ public class AdminGameService {
                     .build());
         }
 
-        seatRepository.saveAll(seats);
+        seats.forEach(seatRepository::save);
         return seats.size();
     }
 
