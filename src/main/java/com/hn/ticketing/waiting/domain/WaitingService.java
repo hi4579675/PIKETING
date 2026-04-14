@@ -4,6 +4,7 @@ package com.hn.ticketing.waiting.domain;
 
 import com.hn.ticketing.waiting.api.dto.WaitingEnterResponse;
 import com.hn.ticketing.waiting.api.dto.WaitingStatusResponse;
+import com.hn.ticketing.waiting.domain.exception.AlreadyInQueueException;
 import com.hn.ticketing.waiting.domain.exception.QueueNotEnteredException;
 import com.hn.ticketing.waiting.infrastructure.RedisAdmissionRepository;
 import com.hn.ticketing.waiting.infrastructure.RedisWaitingRepository;
@@ -27,7 +28,7 @@ public class WaitingService {
     public WaitingEnterResponse enterQueue(Long gameId, Long memberId) {
         boolean entered = waitingRepository.enterQueue(gameId, memberId);
         if (!entered) {
-            throw new ArithmeticException();
+            throw new AlreadyInQueueException();
         }
         Long rank = waitingRepository.getRank(gameId, memberId);
         long total = waitingRepository.getQueueSize(gameId);
