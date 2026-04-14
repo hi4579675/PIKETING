@@ -1,7 +1,7 @@
 # Seat Hold 시스템 설계
 
 > **문서 버전**: v0.1
-> **작성일**: 2026-04-07
+> **작성일**: 2026-04-14
 > **관련 문서**: PROJECT_PROPOSAL §8 도전 1, ERD §1.3 §3.4, WAITING_QUEUE_DESIGN §2.2
 
 ---
@@ -97,7 +97,8 @@ EXPIRE seat:hold:42:12345 420
 - 타임아웃 처리 시 expires_at을 명시적으로 비교 가능 (TTL 보강)
 
 **왜 expires_at을 또 저장하나 — TTL 있는데:**
-TTL은 Redis가 자동 삭제해주지만, *만료 직전*에 race condition이 발생할 수 있다. 점유 만료 처리 워커나 좌석 조회 로직이 expires_at을 *명시적으로* 비교하면 더 안전하다. §6 시나리오 4 참조.
+TTL은 Redis가 자동 삭제해주지만, *만료 직전*에 race condition이 발생할 수 있다. 점유 만료 처리 워커나 좌석 조회 로직이 expires_at을
+*명시적으로* 비교하면 더 안전하다. §6 시나리오 4 참조.
 
 #### `seat:user_holds:{gameId}:{userId}` (Set)
 
@@ -196,7 +197,7 @@ Redis가 자동으로 `seat:hold` 키를 삭제한다. 단, `seat:user_holds` Se
 - (B) Lua 스크립트로 SCARD + EXISTS + HSET + SADD를 한 번에 — *채택 예정 (v0.2)* 
 - (C) 1차 방어는 단순 SCARD, 2차 방어는 결제 확정 시점에 user_id별 active 예매 수 검증 — *현재 채택* 
 
-면접에서 "race condition 있지 않나요?" 물으면 "1차는 SCARD로 막고, 2차는 Lua 스크립트화로 v0.2에서 보강 예정이며, 최종 방어는 결제 확정 단계의 검증"이라고 답할 수 있어야 함.
+ "race condition 있지 않나요?" 물으면 "1차는 SCARD로 막고, 2차는 Lua 스크립트화로 v0.2에서 보강 예정이며, 최종 방어는 결제 확정 단계의 검증"이라고 답할 수 있어야 함.
 
 ---
 
@@ -250,7 +251,7 @@ function getUserActiveHolds(gameId, userId):
 - **중기 (애플리케이션):** 좌석 조회 시 Redis HELD 상태인 좌석에 대해 *MySQL에 CONFIRMED가 있는지*를 추가 검증. 있으면 "이미 확정됨"으로 표시 + 백그라운드 작업으로 Redis 키 정리.
 - **장기 (Outbox 활용):** 결제 확정 시 발행되는 OutboxEvent의 컨슈머가 Redis 정리를 수행. Outbox가 *최소 한 번* 전달을 보장하므로, Redis 정리가 결국 일어남.
 
-**면접 답변 요점:** "결정론적으로 막진 못하지만, *결과적으로 일관*하다(eventually consistent). TTL과 백그라운드 정리로 자동 회복된다." 분산 시스템의 *현실적인* 답변이다.
+**요점:** "결정론적으로 막진 못하지만, *결과적으로 일관*하다(eventually consistent). TTL과 백그라운드 정리로 자동 회복된다." 분산 시스템의 *현실적인* 답변이다.
 
 ---
 

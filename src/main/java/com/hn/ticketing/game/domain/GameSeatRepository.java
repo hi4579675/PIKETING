@@ -10,4 +10,6 @@ public interface GameSeatRepository {
 
     // 특정 경기의 전체 좌석 조회
     List<GameSeat> findByGameId(Long gameId);
+
+    Optional<GameSeat> findByGameIdAndSeatId(Long gameId, Long seatId);
 }

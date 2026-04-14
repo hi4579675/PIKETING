@@ -76,6 +76,9 @@ public class GameSeat extends BaseEntity {
         this.status = status;
     }
 
+    public void updateStatus(GameSeatStatus status) {
+        this.status = status;
+    }
     // ── 정적 팩토리 메서드 ──
     // 경기 등록 시 모든 좌석을 AVAILABLE + 등급별 가격으로 일괄 생성할 때 사용.
     // Builder보다 의도가 명확하다.
